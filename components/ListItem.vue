@@ -1,20 +1,15 @@
 <!-- Please remove this file from your project -->
 <template>
-  <v-card class="mt-4" v-if="item.priority !== 0">
+  <v-card class="mt-4">
     <v-card-text>
       <v-layout row>
         <v-col cols="1">
-          <strong>
+          <p class="pt-2" v-if="item.priority">
             {{ item.priority }}
-          </strong>
+          </p>
         </v-col>
-        <v-col cols="8">
+        <v-col cols="7">
           <v-row>
-            <!--{{ selected }}-->
-            <!--
-              :v-model="selected ? selected : ''"
-              required
-              -->
             <v-autocomplete
               v-model="selected"
               item-value="name"
@@ -23,26 +18,21 @@
               append-icon="uil-angle-down"
               placeholder="Select"
               :items="list"
+              :disabled="selected ? true : false"
               @change="selectProperty"
             ></v-autocomplete>
-            <!--{{ item }}-->
           </v-row>
           <v-spacer></v-spacer>
         </v-col>
-        <v-col cols="3" class="text-right">
-          {{ item.priority }}
-          <v-btn
-            icon
-            @click="sortProperty"
-            :disabled="item.priority === 0 ? true : false"
-          >
+        <v-col cols="4" class="text-right">
+          <v-btn icon @click="sortProperty(item)" :disabled="disableButtons">
             <v-icon color="primary">{{
               item.order === "ASC"
                 ? "uil-sort-amount-down"
                 : "uil-sort-amount-up"
             }}</v-icon>
           </v-btn>
-          <v-btn icon @click="deleteProperty">
+          <v-btn icon @click="deleteProperty(item)" :disabled="disableButtons">
             <v-icon color="error">uil-trash</v-icon>
           </v-btn>
         </v-col>
@@ -68,16 +58,21 @@ export default {
       type: Array,
       default: () => [],
     },
+    disableButtons: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
     selectProperty(e) {
-      this.$emit("selected:property", e.name);
+      this.$emit("selected:property", e);
     },
     sortProperty(e) {
-      this.$emit("sort:property", e.name);
+      this.$emit("sort:property", e);
     },
     deleteProperty(e) {
-      this.$emit("deleted:property", e.name);
+      this.selected = null;
+      this.$emit("delete:property", e);
     },
   },
 };

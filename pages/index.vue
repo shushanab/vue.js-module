@@ -3,9 +3,13 @@
     <v-col cols="12" sm="8" md="6">
       <List
         :list="items"
+        :finalArray="finalArray"
+        :key="finalArray.priority"
+        @append:priority="appendPriority"
         @update:selected="updateSelected"
         @sort:selected="sortSelected"
         @delete:selected="deleteSelected"
+        @submit:properties="submit"
       />
     </v-col>
   </v-row>
@@ -30,6 +34,7 @@ export default {
   data() {
     return {
       currentPriority: 0,
+      finalArray: [],
       items: [
         {
           name: "affiliate",
@@ -77,35 +82,67 @@ export default {
     };
   },
   methods: {
-    updateSelected(name) {
-      const foundIndex = this.items.findIndex((element) => {
-        return element.name === name ? true : false;
-      });
-      console.log("Selected", name, foundIndex);
+    appendPriority(property) {
+      this.finalArray.push(property);
       this.currentPriority += 1;
-      this.items[foundIndex].priority = this.currentPriority;
-      this.items[foundIndex].disabled = true;
+      this.finalArray[this.finalArray.length - 1].priority =
+        this.currentPriority;
     },
-    deleteSelected(name) {
+    updateSelected(selected) {
       const foundIndex = this.items.findIndex((element) => {
-        return element.name === name ? true : false;
+        return element.name === selected.name ? true : false;
       });
-      console.log("Delete", name, foundIndex);
-      this.currentPriority -= 1;
 
-      this.items[foundIndex].priority = 0;
-      this.items[foundIndex].disabled = false;
+      this.items[foundIndex].disabled = true;
+      let current = this.items.filter((item) => item.name === selected.name)[0];
+      this.finalArray[this.finalArray.length - 1].order =
+        current && current.order ? current.order : "DESC";
+
+      this.finalArray[this.finalArray.length - 1].property =
+        current && current.name ? current.name : "";
     },
-    sortSelected(name) {
-      const foundIndex = this.items.findIndex((element) => {
-        return element.name === name ? true : false;
+    deleteSelected(selected) {
+      // find selected in options
+      this.$nextTick(() => {
+        let current = this.items.filter(
+          (item) => item.name === selected.property
+        )[0];
+        current.disabled = false;
+
+        // Identify and delete item by index
+        let foundIndex = this.finalArray.findIndex((item) => {
+          return item.property === current.name;
+        });
+        this.finalArray.splice(foundIndex, 1);
+
+        // fix priority and numeration
+        this.finalArray.forEach((item) => {
+          if (item.priority > foundIndex) item.priority--;
+        });
+        this.currentPriority -= 1;
       });
-      console.log("Sort", name, foundIndex);
-      if (this.items[foundIndex] && this.items[foundIndex].order === "ASC") {
-        this.items[foundIndex].order = "DESC";
+    },
+    sortSelected(selected) {
+      // find selected in options
+      let current = this.items.filter(
+        (item) => item.name === selected.property
+      )[0];
+      let foundIndex = this.finalArray.findIndex((item) => {
+        return item.property === current.name;
+      });
+
+      if (
+        this.finalArray[foundIndex] &&
+        this.finalArray[foundIndex].order === "ASC"
+      ) {
+        this.finalArray[foundIndex].order = "DESC";
       } else {
-        this.items[foundIndex].order = "ASC";
+        this.finalArray[foundIndex].order = "ASC";
       }
+    },
+    submit() {
+      console.log("FINAL LIST: ", this.finalArray);
+      return this.finalArray;
     },
   },
   watch: {
