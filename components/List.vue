@@ -42,7 +42,11 @@
         <v-icon color="primary">uil-plus</v-icon>
         Add property
       </v-btn>
-      <v-btn :disabled="disableButtons" color="primary" @click="submit">
+      <v-btn
+        :disabled="disableButtons || !finalArray.length"
+        color="primary"
+        @click="submit"
+      >
         Submit
       </v-btn>
     </v-card-actions>

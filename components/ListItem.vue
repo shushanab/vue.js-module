@@ -26,14 +26,29 @@
         </v-col>
         <v-col cols="4" class="text-right">
           <v-btn icon @click="sortProperty(item)" :disabled="disableButtons">
-            <v-icon color="primary">{{
-              item.order === "ASC"
-                ? "uil-sort-amount-down"
-                : "uil-sort-amount-up"
-            }}</v-icon>
+            <v-tooltip top>
+              <template #activator="{ on }">
+                <v-icon v-on="on" color="primary">{{
+                  item.order === "ASC"
+                    ? "uil-sort-amount-down"
+                    : "uil-sort-amount-up"
+                }}</v-icon>
+              </template>
+              <span>
+                {{
+                  item.order === "ASC" ? "Sort Descending" : "Sort Assending"
+                }}
+              </span>
+            </v-tooltip>
           </v-btn>
+
           <v-btn icon @click="deleteProperty(item)" :disabled="disableButtons">
-            <v-icon color="error">uil-trash</v-icon>
+            <v-tooltip top>
+              <template #activator="{ on }">
+                <v-icon v-on="on" color="error">uil-trash</v-icon>
+              </template>
+              <span> Delete Property </span></v-tooltip
+            >
           </v-btn>
         </v-col>
       </v-layout>
@@ -71,7 +86,6 @@ export default {
       this.$emit("sort:property", e);
     },
     deleteProperty(e) {
-      this.selected = null;
       this.$emit("delete:property", e);
     },
   },
